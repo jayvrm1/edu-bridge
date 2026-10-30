@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --color-warm-yellow: #FFD966;
+  --color-brand-orange: #F28C00;
+  --color-peach: #FFE0BD;
+  --color-pastel-blue: #D9EAFB;
+  --color-light-cream: #FFF0C9;
+  --color-soft-pink: #F6C4C4;
+  --color-charcoal: #222222;
+  --color-desk: #F1F1F1;
+}
+
+:root {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #222222;
+}
+
+/* Accessibility Modes */
+html.high-contrast {
+  filter: contrast(135%);
+}
+
+html.high-contrast body {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+html[data-text-size="large"] {
+  font-size: 112.5%;
+}
+
+html[data-text-size="xlarge"] {
+  font-size: 125%;
+}
+
+/* Custom dashed border utility matching Stitch spec */
+.border-stitch-dashed {
+  border-style: dashed;
+  border-color: rgba(34, 34, 34, 0.22);
+}
+
+/* Soft ambient shadow per Stitch design */
+.shadow-stitch {
+  box-shadow: 0 4px 20px rgba(34, 34, 34, 0.05);
+}
+
+.shadow-stitch-sm {
+  box-shadow: 0 2px 8px rgba(34, 34, 34, 0.04);
+}
+
+/* Accessible focus ring */
+*:focus-visible {
+  outline: 2.5px solid #F28C00;
+  outline-offset: 2px;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #dbc2ae;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #F28C00;
+}
