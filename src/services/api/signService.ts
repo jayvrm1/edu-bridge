@@ -8,9 +8,29 @@ import { SignExercise, SignRecognitionResult } from '../../types';
 import { SAMPLE_SIGN_EXERCISES } from './mockData';
 
 let activeSessionId: string | null = null;
+const animationCache: Record<string, any> = {};
+
+export interface AnimationBoneTrack {
+  bone_name: string;
+  times: number[];
+  values: number[];
+}
+
+export interface SignAnimationData {
+  gloss: string;
+  duration_ms: number;
+  hamnosys_symbols?: string[];
+  raw_sigml?: string;
+  threejs_bones?: AnimationBoneTrack[];
+}
 
 export const signService = {
-  async getSessionId(): Promise<string> {
+  /**
+   * Get or create a real-time recognition session.
+   * Note: client_fps reflects the recognition sampling rate (e.g. 1.25 - 2.0 FPS),
+   * NOT the camera preview frame rate (30 - 60 FPS).
+   */
+  async getSessionId(clientFps = 1.5): Promise<string> {
     if (activeSessionId) return activeSessionId;
     try {
       const res = await apiClient<any>('/api/v1/sign-language/sessions', {
@@ -18,7 +38,7 @@ export const signService = {
         body: JSON.stringify({
           mode: 'realtime',
           language: 'ISL',
-          client_fps: 15,
+          client_fps: clientFps,
         }),
       });
       if (res?.session_id) {
@@ -39,11 +59,11 @@ export const signService = {
       });
       if (res?.supported_signs && Array.isArray(res.supported_signs)) {
         // Merge real backend vocabulary signs with rich metadata
-        const backendExercises: SignExercise[] = res.supported_signs.slice(0, 12).map((signName: string, idx: number) => ({
+        const backendExercises: SignExercise[] = res.supported_signs.slice(0, 15).map((signName: string, idx: number) => ({
           id: `ex_${signName.toLowerCase()}_${idx}`,
           title: `Sign: ${signName}`,
           sign: signName,
-          category: idx < 6 ? 'Basics' : 'Core Gestures',
+          category: idx < 5 ? 'Basics' : idx < 10 ? 'Alphabet & Numbers' : 'Core Gestures',
           description: `Practice the authentic Indian Sign Language posture for "${signName}".`,
           tips: ['Keep hands within the camera frame', 'Maintain a steady posture for 1 second'],
           xpReward: 35,
@@ -61,10 +81,11 @@ export const signService = {
 
   async recognizeFrame(
     frameBase64: string,
-    targetSignHint?: string
+    targetSignHint?: string,
+    recognitionFps = 1.5
   ): Promise<SignRecognitionResult> {
     try {
-      const sessionId = await this.getSessionId();
+      const sessionId = await this.getSessionId(recognitionFps);
       // Clean base64 data URL header if present
       const cleanBase64 = frameBase64.includes('base64,')
         ? frameBase64.split('base64,')[1]
@@ -124,11 +145,18 @@ export const signService = {
         }),
       });
 
-      if (res?.gloss_sequence && Array.isArray(res.gloss_sequence)) {
+      let tokens: string[] = [];
+      if (res?.sequence && Array.isArray(res.sequence)) {
+        tokens = res.sequence.map((item: any) => item.token);
+      } else if (res?.gloss_sequence && Array.isArray(res.gloss_sequence)) {
+        tokens = res.gloss_sequence;
+      }
+
+      if (tokens.length > 0) {
         return {
           phrase,
-          tokens: res.gloss_sequence.length > 0 ? res.gloss_sequence : ['HELLO'],
-          durationSeconds: Math.max(res.gloss_sequence.length * 1.2, 1.5),
+          tokens,
+          durationSeconds: Math.max(tokens.length * 1.2, 1.5),
         };
       }
     } catch {
@@ -143,5 +171,40 @@ export const signService = {
       tokens: tokens.length > 0 ? tokens : ['HELLO'],
       durationSeconds: Math.max(tokens.length * 1.5, 2.0),
     };
+  },
+
+  /**
+   * Fetches real Three.js bone keyframe tracks and HamNoSys motion data
+   * for a verified sign from the FastAPI backend.
+   */
+  async getAnimationData(signId: string): Promise<SignAnimationData | null> {
+    const canonical = signId.trim().toUpperCase();
+    if (animationCache[canonical]) {
+      return animationCache[canonical];
+    }
+
+    // Handle common alias transformations to match backend filenames
+    const aliases: Record<string, string> = {
+      'THANK YOU': 'THANKYOU',
+      'THANK_YOU': 'THANKYOU',
+      'HELP': 'HELP-ME',
+      'HELP ME': 'HELP-ME',
+      'HELP YOU': 'HELP-YOU',
+    };
+    const lookupKey = aliases[canonical] || canonical;
+
+    try {
+      const res = await apiClient<SignAnimationData>(`/api/v1/avatar/animation/${encodeURIComponent(lookupKey)}`, {
+        method: 'GET',
+      });
+      if (res && res.gloss) {
+        animationCache[canonical] = res;
+        return res;
+      }
+    } catch {
+      // Not in backend inventory or network error
+    }
+
+    return null;
   },
 };

@@ -4,7 +4,7 @@
  */
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { Camera, CameraOff, RefreshCw, AlertCircle, CheckCircle, Video, Volume2 } from 'lucide-react';
+import { Camera, CameraOff, RefreshCw, AlertCircle, CheckCircle, Video, Volume2, Sliders, Zap } from 'lucide-react';
 import { signService } from '../../services/api/signService';
 import { SignRecognitionResult } from '../../types';
 import { useAccessibility } from '../../context/AccessibilityContext';
@@ -24,6 +24,13 @@ export const CameraWorkspace: React.FC<CameraWorkspaceProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const recognitionIntervalRef = useRef<number | null>(null);
+  const fpsMeasurementCallbackIdRef = useRef<number | null>(null);
+  const animFrameIdRef = useRef<number | null>(null);
+
+  // Recognition in-flight guard ref to guarantee at most one request is in-flight
+  const inFlightRef = useRef<boolean>(false);
+  const frameCountRef = useRef<number>(0);
+  const lastFpsTimestampRef = useRef<number>(performance.now());
 
   const { speak, announce } = useAccessibility();
 
@@ -33,17 +40,41 @@ export const CameraWorkspace: React.FC<CameraWorkspaceProps> = ({
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user');
   const [latestResult, setLatestResult] = useState<SignRecognitionResult | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
-  const [fps, setFps] = useState<number>(15);
 
-  // Stop camera tracks cleanly
+  // Camera Settings
+  const [targetFps, setTargetFps] = useState<30 | 60>(30);
+  const [measuredPreviewFps, setMeasuredPreviewFps] = useState<number>(0);
+  const [recognitionIntervalMs, setRecognitionIntervalMs] = useState<number>(800);
+
+  // Stop camera tracks and timers cleanly
   const stopCamera = useCallback(() => {
     if (recognitionIntervalRef.current) {
       clearInterval(recognitionIntervalRef.current);
       recognitionIntervalRef.current = null;
     }
 
+    if (videoRef.current && typeof (videoRef.current as any).cancelVideoFrameCallback === 'function' && fpsMeasurementCallbackIdRef.current !== null) {
+      try {
+        (videoRef.current as any).cancelVideoFrameCallback(fpsMeasurementCallbackIdRef.current);
+      } catch {
+        // ignore
+      }
+      fpsMeasurementCallbackIdRef.current = null;
+    }
+
+    if (animFrameIdRef.current) {
+      cancelAnimationFrame(animFrameIdRef.current);
+      animFrameIdRef.current = null;
+    }
+
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current.getTracks().forEach((track) => {
+        try {
+          track.stop();
+        } catch {
+          // ignore
+        }
+      });
       streamRef.current = null;
     }
 
@@ -51,56 +82,194 @@ export const CameraWorkspace: React.FC<CameraWorkspaceProps> = ({
       videoRef.current.srcObject = null;
     }
 
+    inFlightRef.current = false;
+    setIsProcessing(false);
     setIsCameraActive(false);
+    setMeasuredPreviewFps(0);
+  }, []);
+
+  /**
+   * Request MediaStream with progressive fallback:
+   * 1. Try selected target FPS (30 or 60).
+   * 2. If unsupported/rejected, fall back to 30 FPS.
+   * 3. If still unsupported, fall back to browser defaults.
+   */
+  const acquireMediaStream = async (facing: 'user' | 'environment', desiredFps: number): Promise<MediaStream> => {
+    // Attempt 1: Desired target FPS
+    try {
+      return await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: facing,
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          frameRate: { ideal: desiredFps },
+        },
+        audio: false,
+      });
+    } catch (err: any) {
+      console.warn(`[Camera] Could not acquire stream at ${desiredFps} FPS:`, err);
+    }
+
+    // Attempt 2: Fallback to 30 FPS if user requested 60 FPS
+    if (desiredFps !== 30) {
+      try {
+        return await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: facing,
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+            frameRate: { ideal: 30 },
+          },
+          audio: false,
+        });
+      } catch (err: any) {
+        console.warn('[Camera] Fallback to 30 FPS failed:', err);
+      }
+    }
+
+    // Attempt 3: Browser defaults without frameRate constraints
+    return await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: facing,
+        width: { ideal: 640 },
+        height: { ideal: 480 },
+      },
+      audio: false,
+    });
+  };
+
+  // Start frame rate measurement loop
+  const startFpsMeasurement = useCallback((videoEl: HTMLVideoElement, stream: MediaStream) => {
+    // Inspect track settings first
+    const videoTrack = stream.getVideoTracks()[0];
+    const settings = videoTrack?.getSettings();
+    if (settings?.frameRate && settings.frameRate > 0) {
+      setMeasuredPreviewFps(Math.round(settings.frameRate));
+    }
+
+    // Use requestVideoFrameCallback if supported by the browser (Chrome, Edge, Brave, Opera)
+    if (typeof (videoEl as any).requestVideoFrameCallback === 'function') {
+      frameCountRef.current = 0;
+      lastFpsTimestampRef.current = performance.now();
+
+      const onFrame = () => {
+        frameCountRef.current += 1;
+        const now = performance.now();
+        const elapsed = now - lastFpsTimestampRef.current;
+
+        if (elapsed >= 1000) {
+          const calculated = Math.round((frameCountRef.current * 1000) / elapsed);
+          setMeasuredPreviewFps(calculated);
+          frameCountRef.current = 0;
+          lastFpsTimestampRef.current = now;
+        }
+
+        if (videoRef.current) {
+          fpsMeasurementCallbackIdRef.current = (videoRef.current as any).requestVideoFrameCallback(onFrame);
+        }
+      };
+
+      fpsMeasurementCallbackIdRef.current = (videoEl as any).requestVideoFrameCallback(onFrame);
+    } else {
+      // Fallback measurement using requestAnimationFrame
+      frameCountRef.current = 0;
+      lastFpsTimestampRef.current = performance.now();
+
+      const measureRaf = () => {
+        frameCountRef.current += 1;
+        const now = performance.now();
+        const elapsed = now - lastFpsTimestampRef.current;
+
+        if (elapsed >= 1000) {
+          const calculated = Math.round((frameCountRef.current * 1000) / elapsed);
+          setMeasuredPreviewFps(calculated);
+          frameCountRef.current = 0;
+          lastFpsTimestampRef.current = now;
+        }
+
+        animFrameIdRef.current = requestAnimationFrame(measureRaf);
+      };
+
+      animFrameIdRef.current = requestAnimationFrame(measureRaf);
+    }
   }, []);
 
   // Request camera and start stream
-  const startCamera = async () => {
+  const startCamera = async (customFps?: 30 | 60) => {
     setPermissionError(null);
+    const chosenFps = customFps || targetFps;
+
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error('Camera access is not supported by your browser environment.');
       }
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode,
-          width: { ideal: 640 },
-          height: { ideal: 480 },
-        },
-        audio: false,
-      });
-
+      const stream = await acquireMediaStream(facingMode, chosenFps);
       streamRef.current = stream;
+
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.play();
+        try {
+          await videoRef.current.play();
+        } catch (playErr) {
+          console.warn('[Camera] Autoplay was prevented or interrupted:', playErr);
+        }
+        startFpsMeasurement(videoRef.current, stream);
       }
 
       setIsCameraActive(true);
       setCameraPermission('granted');
-      announce('Webcam connected. Indian Sign Language detection active.');
+      announce(`Webcam connected. Preview running with ${chosenFps} FPS target.`);
 
-      // Start recognition loop (~ every 1.5s for balance between performance and responsiveness)
+      // Start recognition loop with single-in-flight guarantee
       startRecognitionLoop();
     } catch (err: any) {
       console.error('Camera access error:', err);
       setCameraPermission('denied');
       setPermissionError(
         err.name === 'NotAllowedError'
-          ? 'Camera permission was denied. Please allow camera access in browser settings.'
+          ? 'Camera permission was denied. Please allow camera access in your browser settings.'
           : err.message || 'Unable to access webcam.'
       );
     }
   };
 
-  // Capture frame and send to recognition endpoint
+  // Switch between 30 and 60 FPS
+  const handleFpsChange = async (newFps: 30 | 60) => {
+    setTargetFps(newFps);
+    if (!isCameraActive || !streamRef.current) return;
+
+    const videoTrack = streamRef.current.getVideoTracks()[0];
+    if (videoTrack && typeof videoTrack.applyConstraints === 'function') {
+      try {
+        await videoTrack.applyConstraints({ frameRate: { ideal: newFps } });
+        const settings = videoTrack.getSettings();
+        if (settings.frameRate) {
+          setMeasuredPreviewFps(Math.round(settings.frameRate));
+        }
+        return;
+      } catch (err) {
+        console.warn(`[Camera] Could not apply ${newFps} FPS via applyConstraints, re-initializing stream:`, err);
+      }
+    }
+
+    // If applyConstraints is unsupported or rejected, cleanly restart stream
+    stopCamera();
+    await startCamera(newFps);
+  };
+
+  // Capture frame and send to recognition endpoint (At most ONE in-flight request)
   const captureAndRecognize = useCallback(async () => {
     if (!videoRef.current || !canvasRef.current || !streamRef.current) return;
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
     if (video.videoWidth === 0 || video.videoHeight === 0) return;
+
+    // SINGLE-FLIGHT LOCK: Prevent requests from piling up and overloading the backend
+    if (inFlightRef.current) {
+      return;
+    }
 
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -109,7 +278,7 @@ export const CameraWorkspace: React.FC<CameraWorkspaceProps> = ({
 
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // Draw simulated futuristic landmark mesh overlay (thumb, index, palm center)
+    // Draw landmark mesh overlay for user posture feedback
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
 
@@ -134,43 +303,56 @@ export const CameraWorkspace: React.FC<CameraWorkspaceProps> = ({
       ctx.stroke();
     });
 
-    const frameData = canvas.toDataURL('image/jpeg', 0.6);
+    const frameData = canvas.toDataURL('image/jpeg', 0.65);
+
+    inFlightRef.current = true;
+    setIsProcessing(true);
 
     try {
-      setIsProcessing(true);
-      const result = await signService.recognizeFrame(frameData, targetSignHint);
+      // Calculate recognition sampling rate consistent with session client_fps
+      const samplingFps = +(1000 / recognitionIntervalMs).toFixed(1);
+      const result = await signService.recognizeFrame(frameData, targetSignHint, samplingFps);
       setLatestResult(result);
       if (onRecognitionResult) {
         onRecognitionResult(result);
       }
     } catch (err) {
-      console.warn('Recognition frame dispatch error:', err);
+      console.warn('[Camera] Recognition frame dispatch error:', err);
     } finally {
       setIsProcessing(false);
+      inFlightRef.current = false;
     }
-  }, [onRecognitionResult, targetSignHint]);
+  }, [onRecognitionResult, targetSignHint, recognitionIntervalMs]);
 
   const startRecognitionLoop = useCallback(() => {
     if (recognitionIntervalRef.current) clearInterval(recognitionIntervalRef.current);
-    recognitionIntervalRef.current = window.setInterval(captureAndRecognize, 1400);
-  }, [captureAndRecognize]);
+    recognitionIntervalRef.current = window.setInterval(captureAndRecognize, recognitionIntervalMs);
+  }, [captureAndRecognize, recognitionIntervalMs]);
 
-  // Clean up when leaving component
+  // Restart recognition loop when interval setting changes
+  useEffect(() => {
+    if (isCameraActive) {
+      startRecognitionLoop();
+    }
+  }, [isCameraActive, startRecognitionLoop]);
+
+  // Clean up when unmounting
   useEffect(() => {
     return () => {
       stopCamera();
     };
   }, [stopCamera]);
 
-  const toggleFacingMode = () => {
+  const toggleFacingMode = async () => {
     stopCamera();
-    setFacingMode((prev) => (prev === 'user' ? 'environment' : 'user'));
+    const nextFacing = facingMode === 'user' ? 'environment' : 'user';
+    setFacingMode(nextFacing);
   };
 
   return (
     <div className="bg-[#FFFFFF] rounded-2xl border-2 border-[#222222] overflow-hidden shadow-stitch flex flex-col">
       {/* Workspace Header */}
-      <div className="px-5 py-3.5 bg-[#FFF0C9] border-b-2 border-[#222222] flex flex-wrap items-center justify-between gap-2">
+      <div className="px-5 py-3.5 bg-[#FFF0C9] border-b-2 border-[#222222] flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-[#F28C00] text-white flex items-center justify-center border border-[#222222]">
             <Video className="w-4 h-4" />
@@ -180,19 +362,73 @@ export const CameraWorkspace: React.FC<CameraWorkspaceProps> = ({
               Live ISL Camera Sensor
             </h3>
             <p className="text-[11px] text-[#666666]">
-              Real-time Indian Sign Language MediaPipe & Cloud Landmark Recognition
+              Real-time Indian Sign Language MediaPipe & Gesture Model Recognition
             </p>
           </div>
         </div>
 
-        {/* Camera Controls */}
-        <div className="flex items-center gap-2">
+        {/* Camera Controls & Settings */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Camera Frame Rate Setting: 30 FPS vs 60 FPS */}
+          <div className="flex items-center bg-[#FFFFFF] rounded-full border-2 border-[#222222] p-0.5">
+            <span className="text-[10px] font-extrabold uppercase px-2 text-[#666666] flex items-center gap-1">
+              <Sliders className="w-3 h-3 text-[#F28C00]" /> FPS:
+            </span>
+            <button
+              onClick={() => handleFpsChange(30)}
+              className={`px-2.5 py-0.5 rounded-full text-xs font-bold transition ${
+                targetFps === 30
+                  ? 'bg-[#F28C00] text-white shadow-xs'
+                  : 'text-[#666666] hover:text-[#222222]'
+              }`}
+              title="Target 30 FPS (Default, recommended for standard webcams)"
+            >
+              30
+            </button>
+            <button
+              onClick={() => handleFpsChange(60)}
+              className={`px-2.5 py-0.5 rounded-full text-xs font-bold transition ${
+                targetFps === 60
+                  ? 'bg-[#F28C00] text-white shadow-xs'
+                  : 'text-[#666666] hover:text-[#222222]'
+              }`}
+              title="Target 60 FPS (High-frame-rate capture for compatible cameras)"
+            >
+              60
+            </button>
+          </div>
+
+          {/* Recognition Rate Dropdown */}
+          <div className="flex items-center bg-[#FFFFFF] rounded-full border-2 border-[#222222] p-0.5">
+            <span className="text-[10px] font-extrabold uppercase px-2 text-[#666666] flex items-center gap-1">
+              <Zap className="w-3 h-3 text-[#F28C00]" /> Sample:
+            </span>
+            {[
+              { label: '500ms', ms: 500, title: 'Fast (2 req/s)' },
+              { label: '800ms', ms: 800, title: 'Balanced (1.25 req/s)' },
+              { label: '1200ms', ms: 1200, title: 'Gentle (0.8 req/s)' },
+            ].map((opt) => (
+              <button
+                key={opt.ms}
+                onClick={() => setRecognitionIntervalMs(opt.ms)}
+                className={`px-2 py-0.5 rounded-full text-[11px] font-bold transition ${
+                  recognitionIntervalMs === opt.ms
+                    ? 'bg-[#FFD966] text-[#222222] shadow-xs'
+                    : 'text-[#666666] hover:text-[#222222]'
+                }`}
+                title={opt.title}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+
           {isCameraActive ? (
             <>
               <button
                 onClick={toggleFacingMode}
                 className="px-3 py-1.5 bg-[#FFFFFF] border-2 border-[#222222] rounded-full text-xs font-bold hover:bg-[#F1F1F1] flex items-center gap-1.5 transition"
-                title="Switch Camera"
+                title="Switch Camera Orientation"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 Flip
@@ -207,7 +443,7 @@ export const CameraWorkspace: React.FC<CameraWorkspaceProps> = ({
             </>
           ) : (
             <button
-              onClick={startCamera}
+              onClick={() => startCamera()}
               className="px-4 py-1.5 bg-[#F28C00] text-white border-2 border-[#222222] rounded-full text-xs font-bold hover:bg-[#de7f00] flex items-center gap-1.5 transition shadow-xs"
             >
               <Camera className="w-3.5 h-3.5" />
@@ -248,7 +484,7 @@ export const CameraWorkspace: React.FC<CameraWorkspaceProps> = ({
               </p>
             </div>
             <button
-              onClick={startCamera}
+              onClick={() => startCamera()}
               className="mt-2 px-5 py-2.5 bg-[#F28C00] text-white rounded-full font-bold text-xs border-2 border-white hover:bg-[#de7f00] transition"
             >
               Enable Camera Access
@@ -267,12 +503,18 @@ export const CameraWorkspace: React.FC<CameraWorkspaceProps> = ({
         {/* Live HUD Overlays (when active) */}
         {isCameraActive && (
           <>
-            {/* Top Status Pill */}
-            <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-xs text-white text-[11px] font-bold px-3 py-1 rounded-full border border-white/20 flex items-center gap-2">
+            {/* Top Status Pill: Discloses Actual Measured Camera Preview FPS */}
+            <div className="absolute top-3 left-3 bg-black/75 backdrop-blur-xs text-white text-[11px] font-bold px-3.5 py-1.5 rounded-full border border-white/20 flex items-center gap-2 shadow-sm">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span>LIVE TRACKING</span>
-              <span className="text-white/60">|</span>
-              <span className="font-mono text-[10px]">15 FPS</span>
+              <span>LIVE SENSOR</span>
+              <span className="text-white/40">|</span>
+              <span className="font-mono text-[10px] text-[#FFD966]" title="Actual rendered frames per second from active camera preview">
+                Camera Preview: {measuredPreviewFps > 0 ? `${measuredPreviewFps} FPS` : `${targetFps} FPS (measuring)`}
+              </span>
+              <span className="text-white/40">|</span>
+              <span className="text-[10px] text-white/80">
+                Recog: {(1000 / recognitionIntervalMs).toFixed(1)}/s
+              </span>
             </div>
 
             {/* Target Hint Badge in Training Mode */}
@@ -323,11 +565,11 @@ export const CameraWorkspace: React.FC<CameraWorkspaceProps> = ({
         )}
       </div>
 
-      {/* Frame processing status bar */}
+      {/* Frame processing status bar with single in-flight lock feedback */}
       <div className="px-4 py-2 bg-[#F1F1F1] border-t-2 border-[#222222] flex items-center justify-between text-xs text-[#666666]">
         <span className="flex items-center gap-1.5">
-          <span className={`w-2 h-2 rounded-full ${isProcessing ? 'bg-[#F28C00] animate-pulse' : 'bg-gray-400'}`} />
-          {isProcessing ? 'Transmitting frame to FastAPI MediaPipe model...' : 'Model ready'}
+          <span className={`w-2 h-2 rounded-full ${isProcessing ? 'bg-[#F28C00] animate-pulse' : 'bg-emerald-500'}`} />
+          {isProcessing ? 'Transmitting frame to FastAPI MediaPipe model (1 in flight)...' : 'Model sensor ready (single-flight queue idle)'}
         </span>
         <span className="text-[11px] font-semibold text-[#222222]">
           FastAPI Route: <code className="font-mono text-[#F28C00]">POST /api/v1/sign-language/sessions/{'{id}'}/frames</code>
