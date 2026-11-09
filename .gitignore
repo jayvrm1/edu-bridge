@@ -1,8 +1,50 @@
+# ==============================================================================
+# EduBridge AI Monorepo .gitignore (Frontend & Backend)
+# ==============================================================================
+
+# Node / Frontend
 node_modules/
 build/
 dist/
 coverage/
-.DS_Store
-*.log
+.wrangler/
+
+# Python / Backend
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Databases
+*.sqlite
+*.sqlite3
+*.db
+edubridge_ai.db
+
+# Secrets & Environment variables
 .env*
 !.env.example
+*.pem
+*.key
+*.cert
+credentials.json
+
+# Operating System & Editors
+.DS_Store
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.log
+.vscode/
+.idea/

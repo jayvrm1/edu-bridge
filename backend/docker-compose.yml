@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: edubridge-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-edubridge}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-edubridge_secure_pass123}
+      POSTGRES_DB: ${POSTGRES_DB:-edubridge_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-edubridge} -d ${POSTGRES_DB:-edubridge_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: edubridge-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=production
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-edubridge}:${POSTGRES_PASSWORD:-edubridge_secure_pass123}@postgres:5432/${POSTGRES_DB:-edubridge_db}
+      - DATABASE_URL_SYNC=postgresql://${POSTGRES_USER:-edubridge}:${POSTGRES_PASSWORD:-edubridge_secure_pass123}@postgres:5432/${POSTGRES_DB:-edubridge_db}
+      - SECRET_KEY=${SECRET_KEY:-edubridge_prod_secret_key_minimum_32chars_long_123}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-edubridge_prod_jwt_secret_key_minimum_32chars_456}
+      - GEMMA_PROVIDER=${GEMMA_PROVIDER:-google_ai_studio}
+      - GEMMA_API_KEY=${GEMMA_API_KEY:-}
+      - GEMMA_MODEL=${GEMMA_MODEL:-gemma-4-26b-a4b-it}
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:5173
+    volumes:
+      - ./ml/model_registry:/app/ml/model_registry:ro
+      - ./ml/assets/sigml:/app/ml/assets/sigml:ro
+
+volumes:
+  pgdata:
+    driver: local
+

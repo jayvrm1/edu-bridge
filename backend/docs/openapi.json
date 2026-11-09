@@ -1,0 +1,5674 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "EduBridge AI Backend",
+    "description": "EduBridge AI Backend \u2014 Learning Without Communication Barriers.\n\nInclusive multimodal learning platform featuring Indian Sign Language (ISL) recognition, Gemma 4 AI Tutor integration, 3D avatar animation pipelines, AAC, and multi-disability accessibility.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+          "General"
+        ],
+        "summary": "API Root",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Health & Status"
+        ],
+        "summary": "System Health Check",
+        "description": "Returns the operational health of the backend application and PostgreSQL database connectivity.",
+        "operationId": "get_health_status_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "Health",
+          "Health & Status"
+        ],
+        "summary": "System Health Check",
+        "description": "Returns the operational health of the backend application and PostgreSQL database connectivity.",
+        "operationId": "get_health_status_api_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Register a new learner account",
+        "operationId": "register_api_v1_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Login to receive access and refresh tokens",
+        "operationId": "login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Rotate refresh token and issue new access token",
+        "operationId": "refresh_token_api_v1_auth_refresh_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Revoke active user session",
+        "operationId": "logout_api_v1_auth_logout_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoutRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/change-password": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Change password for authenticated user",
+        "operationId": "change_password_api_v1_auth_change_password_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/forgot-password": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Request a password reset link (protected against email enumeration)",
+        "operationId": "forgot_password_api_v1_auth_forgot_password_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/reset-password": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Reset password using signed token",
+        "operationId": "reset_password_api_v1_auth_reset_password_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/me": {
+      "get": {
+        "tags": [
+          "User Profile"
+        ],
+        "summary": "Get current user profile and accessibility settings",
+        "operationId": "get_my_profile_api_v1_users_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "User Profile"
+        ],
+        "summary": "Update current user profile information",
+        "operationId": "update_my_profile_api_v1_users_me_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserProfileUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/accessibility/preferences": {
+      "get": {
+        "tags": [
+          "Accessibility Preferences"
+        ],
+        "summary": "Get current user accessibility preferences",
+        "operationId": "get_accessibility_preferences_api_v1_accessibility_preferences_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessibilityPreferencesSchema"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "Accessibility Preferences"
+        ],
+        "summary": "Replace entire accessibility preferences profile",
+        "operationId": "replace_accessibility_preferences_api_v1_accessibility_preferences_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessibilityPreferencesSchema"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessibilityPreferencesSchema"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": [
+          "Accessibility Preferences"
+        ],
+        "summary": "Partially update specific accessibility preferences",
+        "operationId": "patch_accessibility_preferences_api_v1_accessibility_preferences_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessibilityPreferencesUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessibilityPreferencesSchema"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tutor/chat": {
+      "post": {
+        "tags": [
+          "AI Tutor"
+        ],
+        "summary": "Interactive learning turn with Gemma 4 Tutor",
+        "operationId": "tutor_chat_api_v1_tutor_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TutorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TutorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tutor/explain": {
+      "post": {
+        "tags": [
+          "AI Tutor"
+        ],
+        "summary": "Detailed academic concept explanation",
+        "operationId": "tutor_explain_api_v1_tutor_explain_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TutorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TutorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tutor/summarize": {
+      "post": {
+        "tags": [
+          "AI Tutor"
+        ],
+        "summary": "Generate concise educational topic summary",
+        "operationId": "tutor_summarize_api_v1_tutor_summarize_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TutorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TutorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tutor/generate-quiz": {
+      "post": {
+        "tags": [
+          "AI Tutor"
+        ],
+        "summary": "Generate custom educational quiz",
+        "operationId": "generate_quiz_api_v1_tutor_generate_quiz_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuizGenerationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuizGenerationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tutor/quiz/evaluate": {
+      "post": {
+        "tags": [
+          "AI Tutor"
+        ],
+        "summary": "Evaluate submitted quiz answers and award XP",
+        "operationId": "evaluate_quiz_api_v1_tutor_quiz_evaluate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuizEvaluationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuizEvaluationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tutor/conversations": {
+      "get": {
+        "tags": [
+          "AI Tutor"
+        ],
+        "summary": "List learning conversations for current user",
+        "operationId": "list_conversations_api_v1_tutor_conversations_get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConversationResponse"
+                  },
+                  "title": "Response List Conversations Api V1 Tutor Conversations Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tutor/conversations/{conversation_id}": {
+      "get": {
+        "tags": [
+          "AI Tutor"
+        ],
+        "summary": "Retrieve full conversation history",
+        "operationId": "get_conversation_api_v1_tutor_conversations__conversation_id__get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Conversation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "AI Tutor"
+        ],
+        "summary": "Delete conversation and its message history",
+        "operationId": "delete_conversation_api_v1_tutor_conversations__conversation_id__delete",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Conversation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sign-language/models": {
+      "get": {
+        "tags": [
+          "Sign Language Recognition"
+        ],
+        "summary": "List Models",
+        "description": "Returns load status and metadata for all pre-trained sign language models.",
+        "operationId": "list_models_api_v1_sign_language_models_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignModelsStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sign-language/vocabulary": {
+      "get": {
+        "tags": [
+          "Sign Language Recognition"
+        ],
+        "summary": "Get Vocabulary",
+        "description": "Returns the full Indian Sign Language (ISL) vocabulary, categories, and descriptions.",
+        "operationId": "get_vocabulary_api_v1_sign_language_vocabulary_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignVocabularyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sign-language/sessions": {
+      "post": {
+        "tags": [
+          "Sign Language Recognition"
+        ],
+        "summary": "Create Session",
+        "description": "Initializes a new real-time webcam sign language recognition session.",
+        "operationId": "create_session_api_v1_sign_language_sessions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSessionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/sign-language/sessions/{session_id}": {
+      "get": {
+        "tags": [
+          "Sign Language Recognition"
+        ],
+        "summary": "Get Session",
+        "description": "Retrieves session status, frame count, and currently recognized text buffer.",
+        "operationId": "get_session_api_v1_sign_language_sessions__session_id__get",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionStatusResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Sign Language Recognition"
+        ],
+        "summary": "Close Session",
+        "description": "Closes and frees resources for a sign recognition session.",
+        "operationId": "close_session_api_v1_sign_language_sessions__session_id__delete",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sign-language/sessions/{session_id}/frames": {
+      "post": {
+        "tags": [
+          "Sign Language Recognition"
+        ],
+        "summary": "Process Frame",
+        "description": "Processes a base64-encoded webcam video frame.\nExtracts MediaPipe landmarks, performs MLP inference, debounces, and appends confirmed signs.",
+        "operationId": "process_frame_api_v1_sign_language_sessions__session_id__frames_post",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessFrameRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcessFrameResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sign-language/sessions/{session_id}/landmarks": {
+      "post": {
+        "tags": [
+          "Sign Language Recognition"
+        ],
+        "summary": "Process Landmarks",
+        "description": "Processes client-side extracted landmarks directly (efficient for low-bandwidth mobile clients).",
+        "operationId": "process_landmarks_api_v1_sign_language_sessions__session_id__landmarks_post",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessLandmarksRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcessFrameResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sign-language/confirm": {
+      "post": {
+        "tags": [
+          "Sign Language Recognition"
+        ],
+        "summary": "Confirm Text Action",
+        "description": "Executes editing actions (append, space, backspace, clear) on session text.",
+        "operationId": "confirm_text_action_api_v1_sign_language_confirm_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmTextRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfirmTextResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sign-language/clear": {
+      "post": {
+        "tags": [
+          "Sign Language Recognition"
+        ],
+        "summary": "Clear Session Text",
+        "description": "Convenience endpoint to clear current session text buffer.",
+        "operationId": "clear_session_text_api_v1_sign_language_clear_post",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfirmTextResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sign-language/ask-tutor": {
+      "post": {
+        "tags": [
+          "Sign Language Recognition"
+        ],
+        "summary": "Ask Tutor From Sign",
+        "description": "Pipes recognized sign language text directly into the Gemma 4 Cloud AI Tutor.\nEmpowers non-verbal / Deaf learners to ask questions directly via sign language!",
+        "operationId": "ask_tutor_from_sign_api_v1_sign_language_ask_tutor_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AskTutorFromSignRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AskTutorFromSignResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/avatar/languages": {
+      "get": {
+        "tags": [
+          "3D Sign Avatar & Translation"
+        ],
+        "summary": "List Languages",
+        "description": "Lists supported sign languages and available animation inventory.",
+        "operationId": "list_languages_api_v1_avatar_languages_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AvatarLanguageInfo"
+                  },
+                  "type": "array",
+                  "title": "Response List Languages Api V1 Avatar Languages Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/avatar/vocabulary": {
+      "get": {
+        "tags": [
+          "3D Sign Avatar & Translation"
+        ],
+        "summary": "List Vocabulary",
+        "description": "Returns available sign animation glosses and SiGML assets.",
+        "operationId": "list_vocabulary_api_v1_avatar_vocabulary_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 2000,
+              "minimum": 1,
+              "default": 500,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvatarVocabularyResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/avatar/translate": {
+      "post": {
+        "tags": [
+          "3D Sign Avatar & Translation"
+        ],
+        "summary": "Translate Text To Sign",
+        "description": "Translates input text into an ordered sign sequence.\nUtilizes fingerspelling fallback for words not present in the direct SiGML inventory.",
+        "operationId": "translate_text_to_sign_api_v1_avatar_translate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TranslateTextRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TranslateTextResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/avatar/animation/{sign_id}": {
+      "get": {
+        "tags": [
+          "3D Sign Avatar & Translation"
+        ],
+        "summary": "Get Sign Animation",
+        "description": "Retrieves full animation payload for a specific sign gloss or filename.\nReturns parsed HamNoSys tags and Three.js bone keyframe tracks.",
+        "operationId": "get_sign_animation_api_v1_avatar_animation__sign_id__get",
+        "parameters": [
+          {
+            "name": "sign_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Sign Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignAnimationPayload"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/avatar/sequence": {
+      "post": {
+        "tags": [
+          "3D Sign Avatar & Translation"
+        ],
+        "summary": "Compile Animation Sequence",
+        "description": "Compiles a sequence of sign glosses into a concatenated Three.js animation payload.",
+        "operationId": "compile_animation_sequence_api_v1_avatar_sequence_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnimationSequenceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnimationSequenceResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/speech/status": {
+      "get": {
+        "tags": [
+          "Speech & Audio Accessibility"
+        ],
+        "summary": "Get Speech Status",
+        "description": "Returns availability and supported profiles for TTS and STT providers.",
+        "operationId": "get_speech_status_api_v1_speech_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpeechStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/speech/synthesize": {
+      "post": {
+        "tags": [
+          "Speech & Audio Accessibility"
+        ],
+        "summary": "Synthesize Speech",
+        "description": "Converts written text into spoken audio data (TTS).",
+        "operationId": "synthesize_speech_api_v1_speech_synthesize_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SynthesizeSpeechRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SynthesizeSpeechResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/speech/transcribe": {
+      "post": {
+        "tags": [
+          "Speech & Audio Accessibility"
+        ],
+        "summary": "Transcribe Speech",
+        "description": "Converts recorded audio samples into recognized text (STT).",
+        "operationId": "transcribe_speech_api_v1_speech_transcribe_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TranscribeAudioRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TranscribeAudioResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/speech/ask-tutor": {
+      "post": {
+        "tags": [
+          "Speech & Audio Accessibility"
+        ],
+        "summary": "Ask Tutor From Speech",
+        "description": "Transcribes student audio and queries the Gemma 4 AI Tutor directly.\nEmpowers voice-first learners (e.g. visually impaired or mobility impaired).",
+        "operationId": "ask_tutor_from_speech_api_v1_speech_ask_tutor_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "audio_base64",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Audio Base64"
+            }
+          },
+          {
+            "name": "language",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "en",
+              "title": "Language"
+            }
+          },
+          {
+            "name": "conversation_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Conversation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/aac/phrases": {
+      "get": {
+        "tags": [
+          "Augmentative & Alternative Communication (AAC)"
+        ],
+        "summary": "Get Aac Board",
+        "description": "Retrieves full AAC phrase board grouped by categories for user or guest.",
+        "operationId": "get_aac_board_api_v1_aac_phrases_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AACBoardResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "Augmentative & Alternative Communication (AAC)"
+        ],
+        "summary": "Create Custom Phrase",
+        "description": "Creates a user-specific custom AAC communication card.",
+        "operationId": "create_custom_phrase_api_v1_aac_phrases_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AACPhraseCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AACPhraseResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/aac/phrases/{phrase_id}": {
+      "patch": {
+        "tags": [
+          "Augmentative & Alternative Communication (AAC)"
+        ],
+        "summary": "Update Custom Phrase",
+        "description": "Updates an existing custom AAC phrase card belonging to user.",
+        "operationId": "update_custom_phrase_api_v1_aac_phrases__phrase_id__patch",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "phrase_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Phrase Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AACPhraseUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AACPhraseResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Augmentative & Alternative Communication (AAC)"
+        ],
+        "summary": "Delete Custom Phrase",
+        "description": "Deletes an existing custom AAC phrase card belonging to user.",
+        "operationId": "delete_custom_phrase_api_v1_aac_phrases__phrase_id__delete",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "phrase_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Phrase Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/aac/ask-tutor": {
+      "post": {
+        "tags": [
+          "Augmentative & Alternative Communication (AAC)"
+        ],
+        "summary": "Ask Tutor From Aac",
+        "description": "Submits an AAC communication phrase directly to the Gemma 4 AI Tutor.\nEmpowers non-speaking/speech-impaired learners to ask questions via visual symbols.",
+        "operationId": "ask_tutor_from_aac_api_v1_aac_ask_tutor_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "phrase_text",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Phrase Text"
+            }
+          },
+          {
+            "name": "conversation_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Conversation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/visual/ocr": {
+      "post": {
+        "tags": [
+          "Visual Accessibility & OCR"
+        ],
+        "summary": "Extract Text From Image",
+        "description": "Extracts text content from uploaded educational image or document.",
+        "operationId": "extract_text_from_image_api_v1_visual_ocr_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OCRRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OCRResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/visual/describe": {
+      "post": {
+        "tags": [
+          "Visual Accessibility & OCR"
+        ],
+        "summary": "Describe Image Or Diagram",
+        "description": "Generates accessible descriptions for visual diagrams, charts, and educational figures.",
+        "operationId": "describe_image_or_diagram_api_v1_visual_describe_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DescribeImageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescribeImageResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/gamification/profile": {
+      "get": {
+        "tags": [
+          "Gamification & Learning Progress"
+        ],
+        "summary": "Get User Profile",
+        "description": "Retrieves learner's gamification profile, XP level, and progress to next level.",
+        "operationId": "get_user_profile_api_v1_gamification_profile_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserGamificationProfileResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/gamification/xp-history": {
+      "get": {
+        "tags": [
+          "Gamification & Learning Progress"
+        ],
+        "summary": "Get Xp History",
+        "description": "Retrieves chronological XP earning history.",
+        "operationId": "get_xp_history_api_v1_gamification_xp_history_get",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/XPTransactionResponse"
+                  },
+                  "title": "Response Get Xp History Api V1 Gamification Xp History Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/gamification/achievements": {
+      "get": {
+        "tags": [
+          "Gamification & Learning Progress"
+        ],
+        "summary": "Get Achievements",
+        "description": "Lists all available badges and achievements with unlocked status.",
+        "operationId": "get_achievements_api_v1_gamification_achievements_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AchievementResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Get Achievements Api V1 Gamification Achievements Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/gamification/streaks": {
+      "get": {
+        "tags": [
+          "Gamification & Learning Progress"
+        ],
+        "summary": "Get Streaks",
+        "description": "Returns learner's active consecutive day streaks and record.",
+        "operationId": "get_streaks_api_v1_gamification_streaks_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StreakInfoResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/gamification/leaderboard": {
+      "get": {
+        "tags": [
+          "Gamification & Learning Progress"
+        ],
+        "summary": "Get Leaderboard",
+        "description": "Returns actual database leaderboard rankings sorted by total XP.",
+        "operationId": "get_leaderboard_api_v1_gamification_leaderboard_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LeaderboardResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/gamification/challenges": {
+      "get": {
+        "tags": [
+          "Gamification & Learning Progress"
+        ],
+        "summary": "Get Daily Challenges",
+        "description": "Retrieves daily inclusive learning quests and progress.",
+        "operationId": "get_daily_challenges_api_v1_gamification_challenges_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyChallengesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/gamification/challenges/{challenge_id}/complete": {
+      "post": {
+        "tags": [
+          "Gamification & Learning Progress"
+        ],
+        "summary": "Complete Challenge",
+        "description": "Marks a daily learning challenge complete and awards XP.",
+        "operationId": "complete_challenge_api_v1_gamification_challenges__challenge_id__complete_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "challenge_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Challenge Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/gamification/quiz/submit": {
+      "post": {
+        "tags": [
+          "Gamification & Learning Progress"
+        ],
+        "summary": "Submit Quiz",
+        "description": "Submits educational quiz results, records attempt, and awards XP.",
+        "operationId": "submit_quiz_api_v1_gamification_quiz_submit_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuizSubmitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuizSubmitResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AACBoardCategoryGroup": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "phrases": {
+            "items": {
+              "$ref": "#/components/schemas/AACPhraseResponse"
+            },
+            "type": "array",
+            "title": "Phrases"
+          }
+        },
+        "type": "object",
+        "required": [
+          "category",
+          "phrases"
+        ],
+        "title": "AACBoardCategoryGroup"
+      },
+      "AACBoardResponse": {
+        "properties": {
+          "total_phrases": {
+            "type": "integer",
+            "title": "Total Phrases"
+          },
+          "categories": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Categories"
+          },
+          "board": {
+            "items": {
+              "$ref": "#/components/schemas/AACBoardCategoryGroup"
+            },
+            "type": "array",
+            "title": "Board"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_phrases",
+          "categories",
+          "board"
+        ],
+        "title": "AACBoardResponse"
+      },
+      "AACPhraseCreate": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "description": "Phrase category (e.g., greetings, needs, classroom)",
+            "default": "general"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Label",
+            "description": "Short button or card label"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Text",
+            "description": "Full spoken/expressed text"
+          },
+          "icon": {
+            "type": "string",
+            "title": "Icon",
+            "description": "Material / Lucide icon name",
+            "default": "message"
+          },
+          "quick_shortcut": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quick Shortcut",
+            "description": "Keyboard quick shortcut key"
+          },
+          "order_index": {
+            "type": "integer",
+            "title": "Order Index",
+            "description": "Display order sequence",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "text"
+        ],
+        "title": "AACPhraseCreate"
+      },
+      "AACPhraseResponse": {
+        "properties": {
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "description": "Phrase category (e.g., greetings, needs, classroom)",
+            "default": "general"
+          },
+          "label": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Label",
+            "description": "Short button or card label"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Text",
+            "description": "Full spoken/expressed text"
+          },
+          "icon": {
+            "type": "string",
+            "title": "Icon",
+            "description": "Material / Lucide icon name",
+            "default": "message"
+          },
+          "quick_shortcut": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quick Shortcut",
+            "description": "Keyboard quick shortcut key"
+          },
+          "order_index": {
+            "type": "integer",
+            "title": "Order Index",
+            "description": "Display order sequence",
+            "default": 0
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id"
+          },
+          "is_system_default": {
+            "type": "boolean",
+            "title": "Is System Default"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "label",
+          "text",
+          "id",
+          "is_system_default"
+        ],
+        "title": "AACPhraseResponse"
+      },
+      "AACPhraseUpdate": {
+        "properties": {
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "icon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Icon"
+          },
+          "quick_shortcut": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quick Shortcut"
+          },
+          "order_index": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Order Index"
+          }
+        },
+        "type": "object",
+        "title": "AACPhraseUpdate"
+      },
+      "AccessibilityPreferencesSchema": {
+        "properties": {
+          "hearing_impairment": {
+            "type": "boolean",
+            "title": "Hearing Impairment",
+            "description": "Hearing impairment status",
+            "default": false
+          },
+          "visual_impairment": {
+            "type": "boolean",
+            "title": "Visual Impairment",
+            "description": "Visual impairment status",
+            "default": false
+          },
+          "speech_impairment": {
+            "type": "boolean",
+            "title": "Speech Impairment",
+            "description": "Speech impairment status",
+            "default": false
+          },
+          "other_requirements": {
+            "type": "boolean",
+            "title": "Other Requirements",
+            "description": "Other accessibility status",
+            "default": false
+          },
+          "captions_enabled": {
+            "type": "boolean",
+            "title": "Captions Enabled",
+            "description": "Captions enabled on video/speech",
+            "default": false
+          },
+          "sign_language_avatar_enabled": {
+            "type": "boolean",
+            "title": "Sign Language Avatar Enabled",
+            "description": "3D sign-language avatar enabled",
+            "default": true
+          },
+          "visual_notifications_enabled": {
+            "type": "boolean",
+            "title": "Visual Notifications Enabled",
+            "description": "Visual flashes for audio cues",
+            "default": true
+          },
+          "audio_independent_interaction": {
+            "type": "boolean",
+            "title": "Audio Independent Interaction",
+            "description": "Strictly audio-independent workflow",
+            "default": false
+          },
+          "screen_reader_compatible": {
+            "type": "boolean",
+            "title": "Screen Reader Compatible",
+            "description": "Enhanced screen reader compatibility",
+            "default": false
+          },
+          "high_contrast": {
+            "type": "boolean",
+            "title": "High Contrast",
+            "description": "High contrast UI theme",
+            "default": false
+          },
+          "text_size": {
+            "type": "string",
+            "title": "Text Size",
+            "description": "Text size: small, medium, large, x-large",
+            "default": "medium"
+          },
+          "audio_descriptions_enabled": {
+            "type": "boolean",
+            "title": "Audio Descriptions Enabled",
+            "description": "Audio descriptions for diagrams/visuals",
+            "default": false
+          },
+          "voice_interaction_enabled": {
+            "type": "boolean",
+            "title": "Voice Interaction Enabled",
+            "description": "Voice-guided interaction",
+            "default": false
+          },
+          "sign_language_input_enabled": {
+            "type": "boolean",
+            "title": "Sign Language Input Enabled",
+            "description": "Sign language webcam input preferred",
+            "default": false
+          },
+          "aac_communication_enabled": {
+            "type": "boolean",
+            "title": "Aac Communication Enabled",
+            "description": "AAC communication boards enabled",
+            "default": false
+          },
+          "text_communication_enabled": {
+            "type": "boolean",
+            "title": "Text Communication Enabled",
+            "description": "Text chat communication enabled",
+            "default": true
+          },
+          "quick_response_phrases_enabled": {
+            "type": "boolean",
+            "title": "Quick Response Phrases Enabled",
+            "description": "Shortcuts for fast non-verbal responses",
+            "default": false
+          },
+          "preferences_metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Preferences Metadata"
+          }
+        },
+        "type": "object",
+        "title": "AccessibilityPreferencesSchema"
+      },
+      "AccessibilityPreferencesUpdate": {
+        "properties": {
+          "hearing_impairment": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hearing Impairment"
+          },
+          "visual_impairment": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visual Impairment"
+          },
+          "speech_impairment": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Speech Impairment"
+          },
+          "other_requirements": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Other Requirements"
+          },
+          "captions_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Captions Enabled"
+          },
+          "sign_language_avatar_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sign Language Avatar Enabled"
+          },
+          "visual_notifications_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visual Notifications Enabled"
+          },
+          "audio_independent_interaction": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audio Independent Interaction"
+          },
+          "screen_reader_compatible": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Screen Reader Compatible"
+          },
+          "high_contrast": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "High Contrast"
+          },
+          "text_size": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text Size"
+          },
+          "audio_descriptions_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audio Descriptions Enabled"
+          },
+          "voice_interaction_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Voice Interaction Enabled"
+          },
+          "sign_language_input_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sign Language Input Enabled"
+          },
+          "aac_communication_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Aac Communication Enabled"
+          },
+          "text_communication_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text Communication Enabled"
+          },
+          "quick_response_phrases_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quick Response Phrases Enabled"
+          },
+          "preferences_metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferences Metadata"
+          }
+        },
+        "type": "object",
+        "title": "AccessibilityPreferencesUpdate"
+      },
+      "AchievementResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "slug": {
+            "type": "string",
+            "title": "Slug"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "badge_icon": {
+            "type": "string",
+            "title": "Badge Icon"
+          },
+          "xp_reward": {
+            "type": "integer",
+            "title": "Xp Reward"
+          },
+          "is_unlocked": {
+            "type": "boolean",
+            "title": "Is Unlocked",
+            "default": false
+          },
+          "unlocked_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unlocked At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "description",
+          "badge_icon",
+          "xp_reward"
+        ],
+        "title": "AchievementResponse"
+      },
+      "AnimationSequenceRequest": {
+        "properties": {
+          "glosses": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Glosses",
+            "description": "List of sign glosses to compile into animation sequence"
+          },
+          "fps": {
+            "type": "integer",
+            "title": "Fps",
+            "description": "Target animation keyframe rate",
+            "default": 30
+          }
+        },
+        "type": "object",
+        "required": [
+          "glosses"
+        ],
+        "title": "AnimationSequenceRequest"
+      },
+      "AnimationSequenceResponse": {
+        "properties": {
+          "total_signs": {
+            "type": "integer",
+            "title": "Total Signs",
+            "description": "Number of signs in sequence"
+          },
+          "total_duration_ms": {
+            "type": "integer",
+            "title": "Total Duration Ms",
+            "description": "Combined sequence duration in ms"
+          },
+          "animations": {
+            "items": {
+              "$ref": "#/components/schemas/SignAnimationPayload"
+            },
+            "type": "array",
+            "title": "Animations",
+            "description": "Compiled animations ready for avatar playback"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_signs",
+          "total_duration_ms",
+          "animations"
+        ],
+        "title": "AnimationSequenceResponse"
+      },
+      "AskTutorFromSignRequest": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id",
+            "description": "Session identifier containing recognized text"
+          },
+          "custom_instruction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Custom Instruction",
+            "description": "Optional custom instruction to Gemma 4 tutor"
+          },
+          "conversation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation Id",
+            "description": "Optional existing conversation ID to continue"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_id"
+        ],
+        "title": "AskTutorFromSignRequest"
+      },
+      "AskTutorFromSignResponse": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id",
+            "description": "Session identifier"
+          },
+          "recognized_text": {
+            "type": "string",
+            "title": "Recognized Text",
+            "description": "Text queried from sign language session"
+          },
+          "tutor_reply": {
+            "type": "string",
+            "title": "Tutor Reply",
+            "description": "Gemma 4 tutor response"
+          },
+          "conversation_id": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation Id",
+            "description": "Conversation identifier"
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "description": "Tutor response mode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_id",
+          "recognized_text",
+          "tutor_reply",
+          "mode"
+        ],
+        "title": "AskTutorFromSignResponse"
+      },
+      "AvatarLanguageInfo": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "Language identifier (e.g. 'ISL', 'ASL')"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Full language name"
+          },
+          "is_primary": {
+            "type": "boolean",
+            "title": "Is Primary",
+            "description": "Primary platform language",
+            "default": false
+          },
+          "total_animations": {
+            "type": "integer",
+            "title": "Total Animations",
+            "description": "Available animations count",
+            "default": 0
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Support status",
+            "default": "operational"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "name"
+        ],
+        "title": "AvatarLanguageInfo"
+      },
+      "AvatarVocabularyItem": {
+        "properties": {
+          "gloss": {
+            "type": "string",
+            "title": "Gloss",
+            "description": "Sign gloss label (e.g. 'HELLO', 'ZERO')"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename",
+            "description": "Associated SiGML file name"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "description": "Vocabulary category",
+            "default": "general"
+          },
+          "has_sigml": {
+            "type": "boolean",
+            "title": "Has Sigml",
+            "description": "Whether SiGML source file exists",
+            "default": true
+          },
+          "has_hamnosys": {
+            "type": "boolean",
+            "title": "Has Hamnosys",
+            "description": "Whether HamNoSys tags are present",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "gloss",
+          "filename"
+        ],
+        "title": "AvatarVocabularyItem"
+      },
+      "AvatarVocabularyResponse": {
+        "properties": {
+          "total_signs": {
+            "type": "integer",
+            "title": "Total Signs",
+            "description": "Total available sign animations"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "description": "Sign language code",
+            "default": "ISL"
+          },
+          "signs": {
+            "items": {
+              "$ref": "#/components/schemas/AvatarVocabularyItem"
+            },
+            "type": "array",
+            "title": "Signs",
+            "description": "List of available sign vocabulary"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_signs",
+          "signs"
+        ],
+        "title": "AvatarVocabularyResponse"
+      },
+      "ChangePasswordRequest": {
+        "properties": {
+          "current_password": {
+            "type": "string",
+            "title": "Current Password",
+            "description": "Current account password"
+          },
+          "new_password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "New Password",
+            "description": "New strong password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "current_password",
+          "new_password"
+        ],
+        "title": "ChangePasswordRequest"
+      },
+      "ConfirmTextRequest": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id",
+            "description": "Session identifier"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action",
+            "description": "Action: append, space, backspace, or clear",
+            "default": "append"
+          },
+          "character": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Character",
+            "description": "Character to append (required if action='append')"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_id"
+        ],
+        "title": "ConfirmTextRequest"
+      },
+      "ConfirmTextResponse": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id",
+            "description": "Session identifier"
+          },
+          "current_text": {
+            "type": "string",
+            "title": "Current Text",
+            "description": "Updated text buffer"
+          },
+          "action_performed": {
+            "type": "string",
+            "title": "Action Performed",
+            "description": "Action that was executed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_id",
+          "current_text",
+          "action_performed"
+        ],
+        "title": "ConfirmTextResponse"
+      },
+      "ConversationResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/MessageResponse"
+            },
+            "type": "array",
+            "title": "Messages",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "user_id",
+          "title",
+          "created_at"
+        ],
+        "title": "ConversationResponse"
+      },
+      "CreateSessionRequest": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "description": "Recognition mode: auto, alphabet, or number",
+            "default": "auto"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "description": "Sign language dialect (default: ISL)",
+            "default": "ISL"
+          },
+          "client_fps": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Fps",
+            "description": "Target client frame rate",
+            "default": 30.0
+          }
+        },
+        "type": "object",
+        "title": "CreateSessionRequest"
+      },
+      "CreateSessionResponse": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id",
+            "description": "Unique webcam recognition session ID"
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "description": "Active recognition mode"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "description": "Active sign language dialect"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Session creation timestamp"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Session state",
+            "default": "active"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_id",
+          "mode",
+          "language",
+          "created_at"
+        ],
+        "title": "CreateSessionResponse"
+      },
+      "DailyChallengeItem": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "xp_reward": {
+            "type": "integer",
+            "title": "Xp Reward"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "progress": {
+            "type": "integer",
+            "title": "Progress"
+          },
+          "target": {
+            "type": "integer",
+            "title": "Target"
+          },
+          "is_completed": {
+            "type": "boolean",
+            "title": "Is Completed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "description",
+          "xp_reward",
+          "category",
+          "progress",
+          "target",
+          "is_completed"
+        ],
+        "title": "DailyChallengeItem"
+      },
+      "DailyChallengesResponse": {
+        "properties": {
+          "total_challenges": {
+            "type": "integer",
+            "title": "Total Challenges"
+          },
+          "completed_challenges": {
+            "type": "integer",
+            "title": "Completed Challenges"
+          },
+          "challenges": {
+            "items": {
+              "$ref": "#/components/schemas/DailyChallengeItem"
+            },
+            "type": "array",
+            "title": "Challenges"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_challenges",
+          "completed_challenges",
+          "challenges"
+        ],
+        "title": "DailyChallengesResponse"
+      },
+      "DescribeImageRequest": {
+        "properties": {
+          "image_base64": {
+            "type": "string",
+            "title": "Image Base64",
+            "description": "Base64 encoded image or diagram"
+          },
+          "context_prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context Prompt",
+            "description": "Prompt guidance",
+            "default": "Describe this educational diagram for a visually impaired student"
+          },
+          "target_modality": {
+            "type": "string",
+            "title": "Target Modality",
+            "description": "screen_reader, high_contrast, or tactile",
+            "default": "screen_reader"
+          }
+        },
+        "type": "object",
+        "required": [
+          "image_base64"
+        ],
+        "title": "DescribeImageRequest"
+      },
+      "DescribeImageResponse": {
+        "properties": {
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Accessible, descriptive explanation of the image"
+          },
+          "key_elements": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Key Elements",
+            "description": "Primary visual components identified"
+          },
+          "educational_summary": {
+            "type": "string",
+            "title": "Educational Summary",
+            "description": "Key academic takeaway of diagram"
+          },
+          "model_provider": {
+            "type": "string",
+            "title": "Model Provider",
+            "default": "gemma_vision_interface"
+          }
+        },
+        "type": "object",
+        "required": [
+          "description",
+          "educational_summary"
+        ],
+        "title": "DescribeImageResponse"
+      },
+      "ForgotPasswordRequest": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email",
+            "description": "Registered account email address"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "title": "ForgotPasswordRequest"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Overall platform status"
+          },
+          "environment": {
+            "type": "string",
+            "title": "Environment",
+            "description": "Current running environment"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version",
+            "description": "API version",
+            "default": "1.0.0"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp",
+            "description": "Server timestamp"
+          },
+          "database": {
+            "$ref": "#/components/schemas/ServiceStatus",
+            "description": "Database connectivity status"
+          },
+          "services": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Services",
+            "description": "Status of auxiliary services"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "environment",
+          "database"
+        ],
+        "title": "HealthResponse"
+      },
+      "LeaderboardEntry": {
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "title": "Rank"
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "full_name": {
+            "type": "string",
+            "title": "Full Name"
+          },
+          "level": {
+            "type": "integer",
+            "title": "Level"
+          },
+          "xp": {
+            "type": "integer",
+            "title": "Xp"
+          },
+          "current_streak_days": {
+            "type": "integer",
+            "title": "Current Streak Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rank",
+          "user_id",
+          "username",
+          "full_name",
+          "level",
+          "xp",
+          "current_streak_days"
+        ],
+        "title": "LeaderboardEntry"
+      },
+      "LeaderboardResponse": {
+        "properties": {
+          "total_ranked_learners": {
+            "type": "integer",
+            "title": "Total Ranked Learners"
+          },
+          "leaderboard": {
+            "items": {
+              "$ref": "#/components/schemas/LeaderboardEntry"
+            },
+            "type": "array",
+            "title": "Leaderboard"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_ranked_learners",
+          "leaderboard"
+        ],
+        "title": "LeaderboardResponse"
+      },
+      "LogoutRequest": {
+        "properties": {
+          "refresh_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Refresh Token",
+            "description": "Optional refresh token to revoke specifically"
+          }
+        },
+        "type": "object",
+        "title": "LogoutRequest"
+      },
+      "MessageResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "conversation_id": {
+            "type": "integer",
+            "title": "Conversation Id"
+          },
+          "role": {
+            "type": "string",
+            "title": "Role"
+          },
+          "input_type": {
+            "type": "string",
+            "title": "Input Type"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content"
+          },
+          "metadata_payload": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metadata Payload"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "conversation_id",
+          "role",
+          "input_type",
+          "content",
+          "metadata_payload",
+          "created_at"
+        ],
+        "title": "MessageResponse"
+      },
+      "OCRLine": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence",
+            "default": 0.95
+          },
+          "bounding_box": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bounding Box"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "OCRLine"
+      },
+      "OCRRequest": {
+        "properties": {
+          "image_base64": {
+            "type": "string",
+            "title": "Image Base64",
+            "description": "Base64 encoded image (PNG/JPEG/WebP)"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "description": "OCR language hint (e.g., 'eng', 'hin')",
+            "default": "eng"
+          }
+        },
+        "type": "object",
+        "required": [
+          "image_base64"
+        ],
+        "title": "OCRRequest"
+      },
+      "OCRResponse": {
+        "properties": {
+          "extracted_text": {
+            "type": "string",
+            "title": "Extracted Text",
+            "description": "Full extracted text content"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence",
+            "description": "Estimated extraction confidence",
+            "default": 0.92
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/OCRLine"
+            },
+            "type": "array",
+            "title": "Lines",
+            "description": "Extracted text line-by-line"
+          },
+          "image_width": {
+            "type": "integer",
+            "title": "Image Width"
+          },
+          "image_height": {
+            "type": "integer",
+            "title": "Image Height"
+          },
+          "ocr_engine": {
+            "type": "string",
+            "title": "Ocr Engine",
+            "default": "tesseract_or_cv_pipeline"
+          }
+        },
+        "type": "object",
+        "required": [
+          "extracted_text",
+          "image_width",
+          "image_height"
+        ],
+        "title": "OCRResponse"
+      },
+      "ProcessFrameRequest": {
+        "properties": {
+          "frame_base64": {
+            "type": "string",
+            "title": "Frame Base64",
+            "description": "Base64-encoded image frame (JPEG/PNG/WebP)"
+          },
+          "timestamp_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timestamp Ms",
+            "description": "Client frame timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "frame_base64"
+        ],
+        "title": "ProcessFrameRequest"
+      },
+      "ProcessFrameResponse": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id",
+            "description": "Session identifier"
+          },
+          "prediction": {
+            "$ref": "#/components/schemas/SignPrediction",
+            "description": "Frame recognition result"
+          },
+          "current_text": {
+            "type": "string",
+            "title": "Current Text",
+            "description": "Current accumulated text in session buffer"
+          },
+          "frame_count": {
+            "type": "integer",
+            "title": "Frame Count",
+            "description": "Total frames processed in session"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_id",
+          "prediction",
+          "current_text",
+          "frame_count"
+        ],
+        "title": "ProcessFrameResponse"
+      },
+      "ProcessLandmarksRequest": {
+        "properties": {
+          "hands": {
+            "items": {
+              "items": {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Hands",
+            "description": "List of detected hands, each containing 21 landmark dicts with x, y, and optional z"
+          },
+          "timestamp_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timestamp Ms",
+            "description": "Client frame timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "hands"
+        ],
+        "title": "ProcessLandmarksRequest"
+      },
+      "QuestionEvaluation": {
+        "properties": {
+          "question_id": {
+            "type": "integer",
+            "title": "Question Id"
+          },
+          "is_correct": {
+            "type": "boolean",
+            "title": "Is Correct"
+          },
+          "user_answer": {
+            "type": "string",
+            "title": "User Answer"
+          },
+          "correct_answer": {
+            "type": "string",
+            "title": "Correct Answer"
+          },
+          "explanation": {
+            "type": "string",
+            "title": "Explanation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question_id",
+          "is_correct",
+          "user_answer",
+          "correct_answer",
+          "explanation"
+        ],
+        "title": "QuestionEvaluation"
+      },
+      "QuizEvaluationRequest": {
+        "properties": {
+          "topic": {
+            "type": "string",
+            "title": "Topic"
+          },
+          "answers": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Answers",
+            "description": "Map of question_id to user selected answer"
+          },
+          "questions": {
+            "items": {
+              "$ref": "#/components/schemas/QuizQuestion"
+            },
+            "type": "array",
+            "title": "Questions",
+            "description": "The original quiz questions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "topic",
+          "answers",
+          "questions"
+        ],
+        "title": "QuizEvaluationRequest"
+      },
+      "QuizEvaluationResponse": {
+        "properties": {
+          "topic": {
+            "type": "string",
+            "title": "Topic"
+          },
+          "score": {
+            "type": "integer",
+            "title": "Score"
+          },
+          "total_questions": {
+            "type": "integer",
+            "title": "Total Questions"
+          },
+          "percentage": {
+            "type": "number",
+            "title": "Percentage"
+          },
+          "passed": {
+            "type": "boolean",
+            "title": "Passed"
+          },
+          "feedback": {
+            "items": {
+              "$ref": "#/components/schemas/QuestionEvaluation"
+            },
+            "type": "array",
+            "title": "Feedback"
+          },
+          "xp_earned": {
+            "type": "integer",
+            "title": "Xp Earned"
+          }
+        },
+        "type": "object",
+        "required": [
+          "topic",
+          "score",
+          "total_questions",
+          "percentage",
+          "passed",
+          "feedback",
+          "xp_earned"
+        ],
+        "title": "QuizEvaluationResponse"
+      },
+      "QuizGenerationRequest": {
+        "properties": {
+          "topic": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 2,
+            "title": "Topic",
+            "description": "Subject topic to test"
+          },
+          "difficulty": {
+            "type": "string",
+            "title": "Difficulty",
+            "description": "beginner, intermediate, advanced",
+            "default": "beginner"
+          },
+          "number_of_questions": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Number Of Questions",
+            "description": "Number of questions to generate",
+            "default": 5
+          },
+          "question_type": {
+            "type": "string",
+            "title": "Question Type",
+            "description": "multiple_choice, true_false, mixed",
+            "default": "multiple_choice"
+          }
+        },
+        "type": "object",
+        "required": [
+          "topic"
+        ],
+        "title": "QuizGenerationRequest"
+      },
+      "QuizGenerationResponse": {
+        "properties": {
+          "topic": {
+            "type": "string",
+            "title": "Topic"
+          },
+          "difficulty": {
+            "type": "string",
+            "title": "Difficulty"
+          },
+          "questions": {
+            "items": {
+              "$ref": "#/components/schemas/QuizQuestion"
+            },
+            "type": "array",
+            "title": "Questions"
+          },
+          "model_info": {
+            "$ref": "#/components/schemas/TutorModelInfo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "topic",
+          "difficulty",
+          "questions",
+          "model_info"
+        ],
+        "title": "QuizGenerationResponse"
+      },
+      "QuizQuestion": {
+        "properties": {
+          "question_id": {
+            "type": "integer",
+            "title": "Question Id",
+            "description": "1-indexed question sequence number"
+          },
+          "question_text": {
+            "type": "string",
+            "title": "Question Text",
+            "description": "Question statement"
+          },
+          "question_type": {
+            "type": "string",
+            "title": "Question Type",
+            "description": "multiple_choice, true_false, short_answer",
+            "default": "multiple_choice"
+          },
+          "options": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Options",
+            "description": "Choices for multiple choice questions"
+          },
+          "correct_answer": {
+            "type": "string",
+            "title": "Correct Answer",
+            "description": "Correct option or answer text"
+          },
+          "explanation": {
+            "type": "string",
+            "title": "Explanation",
+            "description": "Detailed explanation of why this answer is correct"
+          },
+          "hint": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hint",
+            "description": "Pedagogical hint for the learner"
+          }
+        },
+        "type": "object",
+        "required": [
+          "question_id",
+          "question_text",
+          "correct_answer",
+          "explanation"
+        ],
+        "title": "QuizQuestion"
+      },
+      "QuizSubmitRequest": {
+        "properties": {
+          "lesson_id": {
+            "type": "integer",
+            "title": "Lesson Id",
+            "description": "Target lesson or quiz ID",
+            "default": 1
+          },
+          "score": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Score",
+            "description": "Correct questions count"
+          },
+          "max_score": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Max Score",
+            "description": "Total questions count"
+          },
+          "time_spent_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Time Spent Seconds",
+            "description": "Duration in seconds",
+            "default": 60
+          }
+        },
+        "type": "object",
+        "required": [
+          "score",
+          "max_score"
+        ],
+        "title": "QuizSubmitRequest"
+      },
+      "QuizSubmitResponse": {
+        "properties": {
+          "attempt_id": {
+            "type": "integer",
+            "title": "Attempt Id"
+          },
+          "score": {
+            "type": "integer",
+            "title": "Score"
+          },
+          "max_score": {
+            "type": "integer",
+            "title": "Max Score"
+          },
+          "percentage": {
+            "type": "number",
+            "title": "Percentage"
+          },
+          "passed": {
+            "type": "boolean",
+            "title": "Passed"
+          },
+          "xp_earned": {
+            "type": "integer",
+            "title": "Xp Earned"
+          },
+          "new_total_xp": {
+            "type": "integer",
+            "title": "New Total Xp"
+          },
+          "new_level": {
+            "type": "integer",
+            "title": "New Level"
+          },
+          "unlocked_achievement": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unlocked Achievement"
+          }
+        },
+        "type": "object",
+        "required": [
+          "attempt_id",
+          "score",
+          "max_score",
+          "percentage",
+          "passed",
+          "xp_earned",
+          "new_total_xp",
+          "new_level"
+        ],
+        "title": "QuizSubmitResponse"
+      },
+      "RefreshTokenRequest": {
+        "properties": {
+          "refresh_token": {
+            "type": "string",
+            "title": "Refresh Token",
+            "description": "Valid refresh token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "refresh_token"
+        ],
+        "title": "RefreshTokenRequest"
+      },
+      "ResetPasswordRequest": {
+        "properties": {
+          "reset_token": {
+            "type": "string",
+            "title": "Reset Token",
+            "description": "Cryptographically signed reset token"
+          },
+          "new_password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "New Password",
+            "description": "New strong password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reset_token",
+          "new_password"
+        ],
+        "title": "ResetPasswordRequest"
+      },
+      "ResponsePreferences": {
+        "properties": {
+          "detail_level": {
+            "type": "string",
+            "title": "Detail Level",
+            "description": "Detail level: simple, standard, in_depth",
+            "default": "standard"
+          },
+          "include_examples": {
+            "type": "boolean",
+            "title": "Include Examples",
+            "description": "Whether to include concrete educational examples",
+            "default": true
+          },
+          "target_grade_level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Grade Level",
+            "description": "Optional target grade or difficulty level"
+          }
+        },
+        "type": "object",
+        "title": "ResponsePreferences"
+      },
+      "ServiceStatus": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Service status: healthy, degraded, or unhealthy"
+          },
+          "details": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Details",
+            "description": "Diagnostic details"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status"
+        ],
+        "title": "ServiceStatus"
+      },
+      "SessionStatusResponse": {
+        "properties": {
+          "session_id": {
+            "type": "string",
+            "title": "Session Id",
+            "description": "Unique webcam recognition session ID"
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id",
+            "description": "Associated user ID"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Session state: active, idle, or closed"
+          },
+          "mode": {
+            "type": "string",
+            "title": "Mode",
+            "description": "Recognition mode"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "description": "Sign language code"
+          },
+          "current_text": {
+            "type": "string",
+            "title": "Current Text",
+            "description": "Current text buffer"
+          },
+          "frame_count": {
+            "type": "integer",
+            "title": "Frame Count",
+            "description": "Total frames processed"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Session start time"
+          },
+          "last_activity": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Last Activity",
+            "description": "Last frame or command timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session_id",
+          "status",
+          "mode",
+          "language",
+          "current_text",
+          "frame_count",
+          "created_at",
+          "last_activity"
+        ],
+        "title": "SessionStatusResponse"
+      },
+      "SignAnimationPayload": {
+        "properties": {
+          "gloss": {
+            "type": "string",
+            "title": "Gloss",
+            "description": "Sign gloss"
+          },
+          "sigml_filename": {
+            "type": "string",
+            "title": "Sigml Filename",
+            "description": "SiGML file"
+          },
+          "raw_sigml": {
+            "type": "string",
+            "title": "Raw Sigml",
+            "description": "Raw SiGML XML text"
+          },
+          "hamnosys_symbols": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Hamnosys Symbols",
+            "description": "Extracted HamNoSys tags"
+          },
+          "mouth_picture": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mouth Picture",
+            "description": "Non-manual viseme mouth shape"
+          },
+          "duration_ms": {
+            "type": "integer",
+            "title": "Duration Ms",
+            "description": "Duration in ms",
+            "default": 1200
+          },
+          "threejs_bones": {
+            "items": {
+              "$ref": "#/components/schemas/ThreeJsBoneTrack"
+            },
+            "type": "array",
+            "title": "Threejs Bones",
+            "description": "Bone animation tracks for Three.js"
+          }
+        },
+        "type": "object",
+        "required": [
+          "gloss",
+          "sigml_filename",
+          "raw_sigml"
+        ],
+        "title": "SignAnimationPayload"
+      },
+      "SignModelInfo": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Identifier name of the model"
+          },
+          "filename": {
+            "type": "string",
+            "title": "Filename",
+            "description": "Filename on disk"
+          },
+          "model_type": {
+            "type": "string",
+            "title": "Model Type",
+            "description": "Model architecture type (e.g., MLP, RandomForest)"
+          },
+          "input_dimension": {
+            "type": "integer",
+            "title": "Input Dimension",
+            "description": "Expected feature input dimension (e.g., 42, 84)"
+          },
+          "supported_classes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Supported Classes",
+            "description": "List of recognized symbols"
+          },
+          "is_loaded": {
+            "type": "boolean",
+            "title": "Is Loaded",
+            "description": "Whether model is loaded and ready in memory"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Load status message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "filename",
+          "model_type",
+          "input_dimension",
+          "supported_classes",
+          "is_loaded",
+          "status"
+        ],
+        "title": "SignModelInfo"
+      },
+      "SignModelsStatusResponse": {
+        "properties": {
+          "total_models": {
+            "type": "integer",
+            "title": "Total Models",
+            "description": "Total registered models"
+          },
+          "loaded_models": {
+            "type": "integer",
+            "title": "Loaded Models",
+            "description": "Number of currently loaded models"
+          },
+          "models": {
+            "items": {
+              "$ref": "#/components/schemas/SignModelInfo"
+            },
+            "type": "array",
+            "title": "Models",
+            "description": "Details for each model"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_models",
+          "loaded_models",
+          "models"
+        ],
+        "title": "SignModelsStatusResponse"
+      },
+      "SignPrediction": {
+        "properties": {
+          "predicted_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Predicted Label",
+            "description": "Recognized symbol (e.g. 'A', '1', or None)"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence",
+            "description": "Confidence score between 0.0 and 1.0",
+            "default": 0.0
+          },
+          "is_confirmed": {
+            "type": "boolean",
+            "title": "Is Confirmed",
+            "description": "True if confidence exceeds configured threshold and is debounced",
+            "default": false
+          },
+          "num_hands": {
+            "type": "integer",
+            "title": "Num Hands",
+            "description": "Number of hands detected (0, 1, or 2)",
+            "default": 0
+          },
+          "mode_used": {
+            "type": "string",
+            "title": "Mode Used",
+            "description": "Model used: single_hand_alphabet, two_hand_alphabet, number, etc.",
+            "default": "none"
+          },
+          "top_candidates": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Top Candidates",
+            "description": "Top prediction alternatives with probabilities"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message",
+            "description": "Status or advisory message"
+          }
+        },
+        "type": "object",
+        "title": "SignPrediction"
+      },
+      "SignSequenceToken": {
+        "properties": {
+          "token": {
+            "type": "string",
+            "title": "Token",
+            "description": "Word or character"
+          },
+          "is_fingerspelled": {
+            "type": "boolean",
+            "title": "Is Fingerspelled",
+            "description": "Whether sign is a fingerspelled letter",
+            "default": false
+          },
+          "sigml_file": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sigml File",
+            "description": "Matching SiGML filename if found"
+          },
+          "found": {
+            "type": "boolean",
+            "title": "Found",
+            "description": "Whether matching animation exists",
+            "default": true
+          },
+          "duration_ms": {
+            "type": "integer",
+            "title": "Duration Ms",
+            "description": "Estimated duration in milliseconds",
+            "default": 1200
+          }
+        },
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "title": "SignSequenceToken"
+      },
+      "SignVocabularyItem": {
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "title": "Symbol",
+            "description": "Character, digit, or gesture label"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category",
+            "description": "alphabet, digit, or control_gesture"
+          },
+          "hand_count": {
+            "type": "integer",
+            "title": "Hand Count",
+            "description": "1 for single-hand, 2 for two-hand"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Instructional description of how to perform sign"
+          }
+        },
+        "type": "object",
+        "required": [
+          "symbol",
+          "category",
+          "hand_count",
+          "description"
+        ],
+        "title": "SignVocabularyItem"
+      },
+      "SignVocabularyResponse": {
+        "properties": {
+          "total_items": {
+            "type": "integer",
+            "title": "Total Items",
+            "description": "Total supported vocabulary symbols"
+          },
+          "categories": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Categories",
+            "description": "Categorized list of symbols"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SignVocabularyItem"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "Full vocabulary item specifications"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_items",
+          "categories",
+          "items"
+        ],
+        "title": "SignVocabularyResponse"
+      },
+      "SpeechStatusResponse": {
+        "properties": {
+          "tts_available": {
+            "type": "boolean",
+            "title": "Tts Available",
+            "description": "Whether Text-to-Speech provider is active"
+          },
+          "stt_available": {
+            "type": "boolean",
+            "title": "Stt Available",
+            "description": "Whether Speech-to-Text provider is active"
+          },
+          "tts_provider": {
+            "type": "string",
+            "title": "Tts Provider",
+            "description": "Active TTS provider identifier"
+          },
+          "stt_provider": {
+            "type": "string",
+            "title": "Stt Provider",
+            "description": "Active STT provider identifier"
+          },
+          "supported_voices": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Supported Voices",
+            "description": "Available voice IDs"
+          },
+          "supported_languages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Supported Languages",
+            "description": "Supported language codes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "tts_available",
+          "stt_available",
+          "tts_provider",
+          "stt_provider"
+        ],
+        "title": "SpeechStatusResponse"
+      },
+      "StreakInfoResponse": {
+        "properties": {
+          "current_streak_days": {
+            "type": "integer",
+            "title": "Current Streak Days"
+          },
+          "longest_streak_days": {
+            "type": "integer",
+            "title": "Longest Streak Days"
+          },
+          "last_activity_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Activity Date"
+          },
+          "is_streak_active_today": {
+            "type": "boolean",
+            "title": "Is Streak Active Today"
+          }
+        },
+        "type": "object",
+        "required": [
+          "current_streak_days",
+          "longest_streak_days",
+          "is_streak_active_today"
+        ],
+        "title": "StreakInfoResponse"
+      },
+      "StructuredTutorContent": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "Main pedagogical explanation text"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary",
+            "description": "One to two sentence clear summary",
+            "default": ""
+          },
+          "key_points": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Key Points",
+            "description": "Bulleted takeaway concepts"
+          },
+          "examples": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Examples",
+            "description": "Practical real-world examples"
+          },
+          "suggested_questions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Suggested Questions",
+            "description": "Follow-up exploration questions"
+          },
+          "content_type": {
+            "type": "string",
+            "title": "Content Type",
+            "default": "educational_explanation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "StructuredTutorContent"
+      },
+      "SynthesizeSpeechRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Text",
+            "description": "Text to synthesize to speech"
+          },
+          "voice_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Voice Id",
+            "description": "Voice profile",
+            "default": "default"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "description": "Language code (e.g. 'en', 'hi')",
+            "default": "en"
+          },
+          "speed": {
+            "type": "number",
+            "maximum": 2.0,
+            "minimum": 0.5,
+            "title": "Speed",
+            "description": "Audio speed multiplier",
+            "default": 1.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "SynthesizeSpeechRequest"
+      },
+      "SynthesizeSpeechResponse": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "Synthesized source text"
+          },
+          "audio_base64": {
+            "type": "string",
+            "title": "Audio Base64",
+            "description": "Base64 encoded audio bytes (MP3/WAV)"
+          },
+          "mime_type": {
+            "type": "string",
+            "title": "Mime Type",
+            "description": "Audio MIME format",
+            "default": "audio/mp3"
+          },
+          "duration_estimate_seconds": {
+            "type": "number",
+            "title": "Duration Estimate Seconds",
+            "description": "Estimated playback length"
+          },
+          "provider_used": {
+            "type": "string",
+            "title": "Provider Used",
+            "description": "Provider that generated audio"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "audio_base64",
+          "duration_estimate_seconds",
+          "provider_used"
+        ],
+        "title": "SynthesizeSpeechResponse"
+      },
+      "ThreeJsBoneTrack": {
+        "properties": {
+          "bone_name": {
+            "type": "string",
+            "title": "Bone Name",
+            "description": "Target bone name in human skeleton rig"
+          },
+          "times": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Times",
+            "description": "Keyframe timestamp seconds"
+          },
+          "values": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Values",
+            "description": "Quaternion or Vector3 track values"
+          }
+        },
+        "type": "object",
+        "required": [
+          "bone_name",
+          "times",
+          "values"
+        ],
+        "title": "ThreeJsBoneTrack"
+      },
+      "TokenResponse": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token",
+            "description": "Bearer JWT access token"
+          },
+          "refresh_token": {
+            "type": "string",
+            "title": "Refresh Token",
+            "description": "Bearer JWT refresh token for rotation"
+          },
+          "token_type": {
+            "type": "string",
+            "title": "Token Type",
+            "description": "Token type",
+            "default": "bearer"
+          },
+          "expires_in_minutes": {
+            "type": "integer",
+            "title": "Expires In Minutes",
+            "description": "Access token validity period in minutes"
+          },
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "refresh_token",
+          "expires_in_minutes",
+          "user_id",
+          "username"
+        ],
+        "title": "TokenResponse"
+      },
+      "TranscribeAudioRequest": {
+        "properties": {
+          "audio_base64": {
+            "type": "string",
+            "title": "Audio Base64",
+            "description": "Base64 encoded audio sample (WAV/MP3/WebM)"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "description": "Expected audio language code",
+            "default": "en"
+          }
+        },
+        "type": "object",
+        "required": [
+          "audio_base64"
+        ],
+        "title": "TranscribeAudioRequest"
+      },
+      "TranscribeAudioResponse": {
+        "properties": {
+          "transcription": {
+            "type": "string",
+            "title": "Transcription",
+            "description": "Transcribed textual content"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence",
+            "description": "Confidence score [0.0, 1.0]",
+            "default": 0.95
+          },
+          "language_detected": {
+            "type": "string",
+            "title": "Language Detected",
+            "description": "Detected language code",
+            "default": "en"
+          },
+          "duration_seconds": {
+            "type": "number",
+            "title": "Duration Seconds",
+            "description": "Estimated audio duration",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "transcription"
+        ],
+        "title": "TranscribeAudioResponse"
+      },
+      "TranslateTextRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text",
+            "description": "Input text to translate into sign language sequence"
+          },
+          "target_language": {
+            "type": "string",
+            "title": "Target Language",
+            "description": "Target sign language dialect",
+            "default": "ISL"
+          },
+          "fingerspell_unknown": {
+            "type": "boolean",
+            "title": "Fingerspell Unknown",
+            "description": "Fingerspell words without direct signs",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "TranslateTextRequest"
+      },
+      "TranslateTextResponse": {
+        "properties": {
+          "original_text": {
+            "type": "string",
+            "title": "Original Text",
+            "description": "Original input text"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language",
+            "description": "Target sign language",
+            "default": "ISL"
+          },
+          "sequence": {
+            "items": {
+              "$ref": "#/components/schemas/SignSequenceToken"
+            },
+            "type": "array",
+            "title": "Sequence",
+            "description": "Ordered list of sign tokens"
+          },
+          "total_duration_ms": {
+            "type": "integer",
+            "title": "Total Duration Ms",
+            "description": "Total estimated animation sequence duration"
+          },
+          "coverage_percentage": {
+            "type": "number",
+            "title": "Coverage Percentage",
+            "description": "Percentage of tokens with valid animations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "original_text",
+          "sequence",
+          "total_duration_ms",
+          "coverage_percentage"
+        ],
+        "title": "TranslateTextResponse"
+      },
+      "TutorModelInfo": {
+        "properties": {
+          "provider": {
+            "type": "string",
+            "title": "Provider"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          }
+        },
+        "type": "object",
+        "required": [
+          "provider",
+          "model"
+        ],
+        "title": "TutorModelInfo"
+      },
+      "TutorOutputPreferences": {
+        "properties": {
+          "text_enabled": {
+            "type": "boolean",
+            "title": "Text Enabled",
+            "default": true
+          },
+          "audio_enabled": {
+            "type": "boolean",
+            "title": "Audio Enabled",
+            "default": false
+          },
+          "sign_avatar_enabled": {
+            "type": "boolean",
+            "title": "Sign Avatar Enabled",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "TutorOutputPreferences"
+      },
+      "TutorRequest": {
+        "properties": {
+          "input_type": {
+            "type": "string",
+            "title": "Input Type",
+            "description": "Input modality: text, sign_language, voice, aac, ocr",
+            "default": "text"
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Message",
+            "description": "User's academic question or topic"
+          },
+          "task": {
+            "type": "string",
+            "title": "Task",
+            "description": "Pedagogical task: educational_explanation, concept_simplification, step_by_step, example_generation, summary",
+            "default": "educational_explanation"
+          },
+          "conversation_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation Id",
+            "description": "Optional ID of existing conversation"
+          },
+          "response_preferences": {
+            "$ref": "#/components/schemas/ResponsePreferences"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "TutorRequest"
+      },
+      "TutorResponse": {
+        "properties": {
+          "conversation_id": {
+            "type": "integer",
+            "title": "Conversation Id"
+          },
+          "message_id": {
+            "type": "integer",
+            "title": "Message Id"
+          },
+          "response": {
+            "$ref": "#/components/schemas/StructuredTutorContent"
+          },
+          "output_preferences": {
+            "$ref": "#/components/schemas/TutorOutputPreferences"
+          },
+          "model": {
+            "$ref": "#/components/schemas/TutorModelInfo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "conversation_id",
+          "message_id",
+          "response",
+          "output_preferences",
+          "model"
+        ],
+        "title": "TutorResponse"
+      },
+      "UserGamificationProfileResponse": {
+        "properties": {
+          "user_id": {
+            "type": "integer",
+            "title": "User Id"
+          },
+          "xp": {
+            "type": "integer",
+            "title": "Xp"
+          },
+          "level": {
+            "type": "integer",
+            "title": "Level"
+          },
+          "current_streak_days": {
+            "type": "integer",
+            "title": "Current Streak Days"
+          },
+          "longest_streak_days": {
+            "type": "integer",
+            "title": "Longest Streak Days"
+          },
+          "last_activity_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Activity Date"
+          },
+          "next_level_xp": {
+            "type": "integer",
+            "title": "Next Level Xp"
+          },
+          "progress_percentage": {
+            "type": "number",
+            "title": "Progress Percentage"
+          },
+          "unlocked_achievements_count": {
+            "type": "integer",
+            "title": "Unlocked Achievements Count"
+          },
+          "recent_transactions": {
+            "items": {
+              "$ref": "#/components/schemas/XPTransactionResponse"
+            },
+            "type": "array",
+            "title": "Recent Transactions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "xp",
+          "level",
+          "current_streak_days",
+          "longest_streak_days",
+          "next_level_xp",
+          "progress_percentage",
+          "unlocked_achievements_count"
+        ],
+        "title": "UserGamificationProfileResponse"
+      },
+      "UserLoginRequest": {
+        "properties": {
+          "username_or_email": {
+            "type": "string",
+            "title": "Username Or Email",
+            "description": "Username or email address"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password",
+            "description": "Plaintext password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "username_or_email",
+          "password"
+        ],
+        "title": "UserLoginRequest"
+      },
+      "UserProfileSchema": {
+        "properties": {
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "preferred_language": {
+            "type": "string",
+            "title": "Preferred Language",
+            "default": "en"
+          },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
+          "profile_metadata": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Profile Metadata"
+          }
+        },
+        "type": "object",
+        "title": "UserProfileSchema"
+      },
+      "UserProfileUpdate": {
+        "properties": {
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "preferred_language": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 10
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Language"
+          },
+          "avatar_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avatar Url"
+          },
+          "profile_metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Metadata"
+          }
+        },
+        "type": "object",
+        "title": "UserProfileUpdate"
+      },
+      "UserRegisterRequest": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 3,
+            "title": "Username",
+            "description": "Unique username"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email",
+            "description": "Valid email address"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Password",
+            "description": "Strong password (min 8 chars)"
+          },
+          "full_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name",
+            "description": "Full display name"
+          },
+          "preferred_language": {
+            "type": "string",
+            "maxLength": 10,
+            "title": "Preferred Language",
+            "description": "Preferred UI / teaching language",
+            "default": "en"
+          },
+          "hearing_impairment": {
+            "type": "boolean",
+            "title": "Hearing Impairment",
+            "description": "Has hearing impairment / uses sign language",
+            "default": false
+          },
+          "visual_impairment": {
+            "type": "boolean",
+            "title": "Visual Impairment",
+            "description": "Has visual impairment / needs screen reader or high contrast",
+            "default": false
+          },
+          "speech_impairment": {
+            "type": "boolean",
+            "title": "Speech Impairment",
+            "description": "Has speech impairment / non-speaking / uses AAC",
+            "default": false
+          },
+          "other_requirements": {
+            "type": "boolean",
+            "title": "Other Requirements",
+            "description": "Other physical/cognitive accessibility needs",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "email",
+          "password"
+        ],
+        "title": "UserRegisterRequest"
+      },
+      "UserResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "is_active": {
+            "type": "boolean",
+            "title": "Is Active"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "profile": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserProfileSchema"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "accessibility_preferences": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AccessibilityPreferencesSchema"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "username",
+          "email",
+          "is_active",
+          "created_at"
+        ],
+        "title": "UserResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "XPTransactionResponse": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "amount": {
+            "type": "integer",
+            "title": "Amount"
+          },
+          "action_type": {
+            "type": "string",
+            "title": "Action Type"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "amount",
+          "action_type",
+          "created_at"
+        ],
+        "title": "XPTransactionResponse"
+      }
+    },
+    "securitySchemes": {
+      "OAuth2PasswordBearer": {
+        "type": "oauth2",
+        "flows": {
+          "password": {
+            "scopes": {},
+            "tokenUrl": "/api/v1/auth/login"
+          }
+        }
+      }
+    }
+  }
+}

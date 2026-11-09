@@ -127,11 +127,38 @@ npm run build
 ```
 
 ### 4. Running the Companion FastAPI Backend
-In your backend repository:
+The backend is located directly in the [`backend/`](./backend) directory:
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8000
+cd backend
+python -m venv .venv
+.\.venv\Scripts\activate   # or source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 Open EduBridge AI and click **FastAPI Backend** in the sidebar to verify connection health.
+
+---
+
+## 🏛️ Repository Architecture
+
+This repository contains the complete **EduBridge AI** platform:
+```
+edu-bridge/
+├── src/                     # React 19 Frontend (Components, Pages, Three.js, Context)
+├── public/                  # Static assets & icons
+├── backend/                 # FastAPI & AI/ML Backend Infrastructure
+│   ├── app/                 # FastAPI application, REST endpoints, WebSockets, DB models
+│   ├── ml/                  # ML models (Random Forest, MLPs) & 848 SiGML avatar assets
+│   ├── tests/               # 60 automated backend pytest suites
+│   ├── alembic/             # Database migrations
+│   ├── docs/                # API specs, OpenAPI schema, architecture documentation
+│   ├── requirements.txt     # Python dependencies
+│   ├── Dockerfile           # Backend container definition
+│   └── docker-compose.yml   # Multi-service composition
+├── package.json             # Frontend dependencies & scripts
+├── vite.config.ts           # Vite bundler configuration
+└── wrangler.jsonc           # Cloudflare Pages / deployment config
+```
 
 ---
 
